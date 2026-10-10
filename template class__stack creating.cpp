@@ -1,58 +1,56 @@
 ﻿#include <iostream>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
+template <typename T>
 class Stack
 {
 private:
-	int* arr;
-	int capacity;
-	int top;
+	std::vector<T> arr;
+	std::size_t capacity;
 public:
-	//分配内存，初始化栈顶指针为0
-	Stack(int size) :capacity(size), top(0)
+	//初始化栈容量
+	explicit Stack(std::size_t size) : capacity(size)
 	{
-		arr = new int[capacity];
-	}
-
-	//析构函数释放内存
-	~Stack()
-	{
-		delete[] arr;
-		arr = nullptr;
+		arr.reserve(capacity);
 	}
 
 	//操作函数
 	//判断栈是否为空
 	bool isEmpty() const
 	{
-		return top == 0;
+		return arr.empty();
 	}
 
 	//判断栈是否已满
 	bool isFull() const
 	{
-		return top == capacity;
+		return arr.size() == capacity;
 	}
 
 	//入栈操作
-	void push(int value)
+	bool push(T value)
 	{
 		if (isFull())
 		{
-			std::cout << "Stack is full. Cannot push " << value << std::endl;
-			return;
+			return false;
 		}
-		arr[top++] = value;
+		arr.push_back(std::move(value));
+		return true;
 	}
 	
 	//出栈操作
-	int pop()
+	std::optional<T> pop()
 	{
 		if (isEmpty())
 		{
-			std::cout << "Stack is empty. Cannot pop." << std::endl;
-			return -1; // Return a sentinel value to indicate an error
+			return std::nullopt;
 		}
-		return arr[--top];
+		T value = std::move(arr.back());
+		arr.pop_back();
+		return value;
 	}
 
 	//打印栈内容
@@ -64,9 +62,9 @@ public:
 			return;
 		}
 		std::cout << "Stack contents: ";
-		for (int i = 0; i < top; ++i)
+		for (const auto& value : arr)
 		{
-			std::cout << arr[i] << " ";
+			std::cout << value << " ";
 		}
 		std::cout << std::endl;
 	}
@@ -74,18 +72,20 @@ public:
 };
 int main()
 {
- //   Stack s(5);
- //   s.push(10);
- //   s.push(20);
- //   s.push(30);
-	//s.print();
-	//while (!s.isEmpty())
-	//{
-	//	std::cout << "Popped: " << s.pop() << std::endl;
-	//};
- //   s.print();
-	//该信息用于GitHub上的第三次提交
-	//该信息用于GitHub上的第四次提交
+	Stack<int> intStack(5);
+	intStack.push(10);
+	intStack.push(20);
+	intStack.print();
+	while (const auto value = intStack.pop())
+	{
+		std::cout << "Popped: " << *value << std::endl;
+	}
+
+	Stack<std::string> stringStack(2);
+	stringStack.push("hello");
+	stringStack.push("world");
+	stringStack.print();
+
     return 0;
 
 }
