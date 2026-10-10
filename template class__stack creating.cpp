@@ -74,16 +74,16 @@ public:
 };
 int main()
 {
-    Stack s(5);
-    s.push(10);
-    s.push(20);
-    s.push(30);
-	s.print();
-	while (!s.isEmpty())
-	{
-		std::cout << "Popped: " << s.pop() << std::endl;
-	};
-    s.print();
+ //   Stack s(5);
+ //   s.push(10);
+ //   s.push(20);
+ //   s.push(30);
+	//s.print();
+	//while (!s.isEmpty())
+	//{
+	//	std::cout << "Popped: " << s.pop() << std::endl;
+	//};
+ //   s.print();
     return 0;
 
 }
