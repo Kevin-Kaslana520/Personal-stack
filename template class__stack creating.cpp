@@ -1,83 +1,5 @@
-﻿#include <iostream>
-#include <string>
-#include <stdexcept>
-#include <utility>
-#include <vector>
-
-template <typename T>
-class Stack
-{
-private:
-	std::vector<T> arr;
-	std::size_t capacity;
-public:
-	//初始化栈容量
-	explicit Stack(std::size_t size) : capacity(size)
-	{
-		arr.reserve(capacity);
-	}
-
-	//操作函数
-	//判断栈是否为空
-	bool isEmpty() const
-	{
-		return arr.empty();
-	}
-
-	//判断栈是否已满
-	bool isFull() const
-	{
-		return arr.size() == capacity;
-	}
-
-	//入栈操作
-	void push(T value)
-	{
-		if (isFull())
-		{
-			throw std::overflow_error("Stack is full");
-		}
-		arr.push_back(std::move(value));
-	}
-	
-	//出栈操作
-	T pop()
-	{
-		if (isEmpty())
-		{
-			throw std::underflow_error("Stack is empty");
-		}
-		T value = std::move(arr.back());
-		arr.pop_back();
-		return value;
-	}
-
-	//获取栈顶元素	
-	const T& top() const
-	{
-		if (isEmpty())
-		{
-			throw std::underflow_error("Stack is empty");
-		}
-		return arr.back();
-	}
-
-	//打印栈内容
-	void print() const
-	{
-		if (isEmpty())
-		{
-			throw std::underflow_error("Stack is empty");
-		}
-		std::cout << "Stack contents: ";
-		for (const auto& value : arr)
-		{
-			std::cout << value << " ";
-		}
-		std::cout << std::endl;
-	}
-
-};
+﻿#include "Stack.h"
+#include <iostream>
 int main()
 {
 	auto testStack = [](const char* typeName, auto first, auto second, auto overflow)
@@ -134,8 +56,64 @@ int main()
 	testStack("int", 10, 20, 30);
 	testStack("double", 1.5, 2.5, 3.5);
 	testStack("string", std::string("hello"), std::string("world"), std::string("stack full"));
+	bool allExceptionsPassed = true;
+	auto report = [&allExceptionsPassed](const char* operation, bool passed)
+	{
+		std::cout << (passed ? "通过：" : "失败：") << operation << std::endl;
+		if (!passed)
+		{
+			allExceptionsPassed = false;
+		}
+	};
 
-    return 0;
+	Stack<int> fullStack(1);
+	fullStack.push(100);
+	bool overflowThrown = false;
+	try
+	{
+		fullStack.push(200);
+	}
+	catch (const std::overflow_error&)
+	{
+		overflowThrown = true;
+	}
+	report("栈满时 push() 抛出 std::overflow_error", overflowThrown);
+
+	Stack<int> emptyStack(1);
+	bool popUnderflowThrown = false;
+	try
+	{
+		emptyStack.pop();
+	}
+	catch (const std::underflow_error&)
+	{
+		popUnderflowThrown = true;
+	}
+	report("空栈时 pop() 抛出 std::underflow_error", popUnderflowThrown);
+
+	bool topUnderflowThrown = false;
+	try
+	{
+		emptyStack.top();
+	}
+	catch (const std::underflow_error&)
+	{
+		topUnderflowThrown = true;
+	}
+	report("空栈时 top() 抛出 std::underflow_error", topUnderflowThrown);
+
+	bool printUnderflowThrown = false;
+	try
+	{
+		emptyStack.print();
+	}
+	catch (const std::underflow_error&)
+	{
+		printUnderflowThrown = true;
+	}
+	report("空栈时 print() 抛出 std::underflow_error", printUnderflowThrown);
+
+	return allExceptionsPassed ? 0 : 1;
 
 }
 
