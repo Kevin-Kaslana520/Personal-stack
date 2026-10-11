@@ -1,6 +1,6 @@
 ﻿#include <iostream>
-#include <optional>
 #include <string>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -31,26 +31,35 @@ public:
 	}
 
 	//入栈操作
-	bool push(T value)
+	void push(T value)
 	{
 		if (isFull())
 		{
-			return false;
+			throw std::overflow_error("Stack is full");
 		}
 		arr.push_back(std::move(value));
-		return true;
 	}
 	
 	//出栈操作
-	std::optional<T> pop()
+	T pop()
 	{
 		if (isEmpty())
 		{
-			return std::nullopt;
+			throw std::underflow_error("Stack is empty");
 		}
 		T value = std::move(arr.back());
 		arr.pop_back();
 		return value;
+	}
+
+	//获取栈顶元素	
+	const T& top() const
+	{
+		if (isEmpty())
+		{
+			throw std::underflow_error("Stack is empty");
+		}
+		return arr.back();
 	}
 
 	//打印栈内容
@@ -58,8 +67,7 @@ public:
 	{
 		if (isEmpty())
 		{
-			std::cout << "Stack is empty." << std::endl;
-			return;
+			throw std::underflow_error("Stack is empty");
 		}
 		std::cout << "Stack contents: ";
 		for (const auto& value : arr)
@@ -72,19 +80,60 @@ public:
 };
 int main()
 {
-	Stack<int> intStack(5);
-	intStack.push(10);
-	intStack.push(20);
-	intStack.print();
-	while (const auto value = intStack.pop())
+	auto testStack = [](const char* typeName, auto first, auto second, auto overflow)
 	{
-		std::cout << "Popped: " << *value << std::endl;
-	}
+		Stack<decltype(first)> stack(2);
+		std::cout << "\n测试 " << typeName << " 类型栈：" << std::endl;
+		try
+		{
+			stack.push(first);
+			stack.push(second);
+			stack.push(overflow);
+		}
+		catch (const std::overflow_error& error)
+		{
+			std::cout << "捕获栈满异常: " << error.what() << std::endl;
+		}
 
-	Stack<std::string> stringStack(2);
-	stringStack.push("hello");
-	stringStack.push("world");
-	stringStack.print();
+		stack.print();
+		std::cout << "栈顶元素: " << stack.top() << std::endl;
+
+		for (int i = 0; i < 2; ++i)
+		{
+			std::cout << "出栈元素: " << stack.pop() << std::endl;
+		}
+
+		try
+		{
+			stack.pop();
+		}
+		catch (const std::underflow_error& error)
+		{
+			std::cout << "捕获空栈出栈异常: " << error.what() << std::endl;
+		}
+
+		try
+		{
+			stack.top();
+		}
+		catch (const std::underflow_error& error)
+		{
+			std::cout << "捕获空栈取栈顶异常: " << error.what() << std::endl;
+		}
+
+		try
+		{
+			stack.print();
+		}
+		catch (const std::underflow_error& error)
+		{
+			std::cout << "捕获空栈打印异常: " << error.what() << std::endl;
+		}
+	};
+
+	testStack("int", 10, 20, 30);
+	testStack("double", 1.5, 2.5, 3.5);
+	testStack("string", std::string("hello"), std::string("world"), std::string("stack full"));
 
     return 0;
 
