@@ -17,6 +17,10 @@ public:
 	//初始化栈容量
 	explicit Stack(std::size_t size) : capacity(size)
 	{
+		if (capacity == 0)
+		{
+			throw std::invalid_argument("Stack capacity must be greater than zero");
+		}
 		arr.reserve(capacity);
 	}
 
