@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -55,6 +56,15 @@ public:
 	}
 
 	//获取栈顶元素	
+	T& top()
+	{
+		if (isEmpty())
+		{
+			throw std::underflow_error("Stack is empty");
+		}
+		return arr.back();
+	}
+
 	const T& top() const
 	{
 		if (isEmpty())
