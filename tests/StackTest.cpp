@@ -1,5 +1,6 @@
-﻿#include "Stack.h"
+﻿#include <MyStack/Stack.h>
 #include <iostream>
+using MyStack::Stack;
 int main()
 {
 	auto testStack = [](const char* typeName, auto first, auto second, auto overflow)

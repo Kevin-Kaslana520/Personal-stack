@@ -1,4 +1,4 @@
-# template class__stack creating
+﻿# template class__stack creating
 # C++ Template Stack
 
 一个使用 C++ 类模板实现的栈容器练习项目。
@@ -20,3 +20,6 @@
 
 * Visual Studio
 * C++
+
+10月13号更新
+用cmake完成了该栈的库的编译和链接，添加了测试用例，完善了README文档。
