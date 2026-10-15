@@ -1,77 +1,80 @@
-
 cmake_minimum_required(VERSION 3.20)
 
-project(MyStack LANGUAGES CXX)
+project(MyStack VERSION 1.0.0 LANGUAGES CXX)
 
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
 
-# 创建 MyStack 库
+# Build the library as a header-only interface target.
 add_library(MyStack INTERFACE)
+add_library(MyStack::MyStack ALIAS MyStack)
+set_target_properties(MyStack PROPERTIES EXPORT_NAME MyStack)
 
 target_include_directories(MyStack INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-# 创建测试程序
-add_executable(StackTests
-    tests/StackTest.cpp
-)
+target_compile_features(MyStack INTERFACE cxx_std_17)
 
-
-# 测试程序使用 MyStack
-target_link_libraries(StackTests PRIVATE
-    MyStack
-)
-
-
-target_compile_features(StackTests PRIVATE cxx_std_17)
-
+# Example executable.
 add_executable(MyStackExample
     examples/main.cpp
 )
 
-target_link_libraries(MyStackExample PRIVATE
-    MyStack
-)
+target_link_libraries(MyStackExample PRIVATE MyStack)
+target_compile_features(MyStackExample PRIVATE cxx_std_17)
 
+# Unit tests.
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(StackTests
+        tests/StackTest.cpp
+    )
+
+    target_link_libraries(StackTests PRIVATE MyStack)
+    target_compile_features(StackTests PRIVATE cxx_std_17)
+
+    add_test(NAME StackTests COMMAND StackTests)
+endif()
+
+# Install headers.
 install(
     DIRECTORY include/
-    DESTINATION include
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+# Install the library target and its package export.
 install(
     TARGETS MyStack
     EXPORT MyStackTargets
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-
-include(CMakePackageConfigHelpers)
-
-
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/MyStackConfigVersion.cmake"
-    VERSION 1.0.0
-    COMPATIBILITY AnyNewerVersion
-)
-
-
-configure_package_config_file(
-    cmake/MyStackConfig.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/MyStackConfig.cmake"
-    INSTALL_DESTINATION lib/cmake/MyStack
-)
-
 
 install(
     EXPORT MyStackTargets
     FILE MyStackTargets.cmake
     NAMESPACE MyStack::
-    DESTINATION lib/cmake/MyStack
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MyStack
 )
 
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/MyStackConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/MyStackConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MyStack
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/MyStackConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
 
 install(
     FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/MyStackConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/MyStackConfigVersion.cmake"
-    DESTINATION lib/cmake/MyStack
+        ${CMAKE_CURRENT_BINARY_DIR}/MyStackConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/MyStackConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MyStack
 )
+
+include(CPack)
